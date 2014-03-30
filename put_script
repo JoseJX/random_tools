@@ -1,0 +1,21 @@
+#!/bin/bash
+### Where are the ResidualVM tools found?
+TP=/home/jjezak/Projects/SummerOfCode2014/residualvm-tools/build
+### Where is the EMI data?
+DD=/mnt/data/scummvm/Monkey\ Island\ 4
+
+### Code
+p=$(pwd)
+mkdir /tmp/dumpdir
+cd /tmp/dumpdir && $TP/unlab "${DD}"/local.m4b > /dev/null
+cd $p
+$TP/luac -o $1.tmp $1
+mv $1.tmp /tmp/dumpdir/$1
+
+### Check if there's a backup of the library already
+if [ ! -e "${DD}"/local.m4b.bak ]; then
+	cp "${DD}"/local.m4b "${DD}"/local.m4b.bak
+fi
+
+${TP}/mklab --emi /tmp/dumpdir "${DD}"/local.m4b
+rm -rf /tmp/dumpdir
