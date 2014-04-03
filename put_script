@@ -9,7 +9,12 @@ p=$(pwd)
 mkdir /tmp/dumpdir
 cd /tmp/dumpdir && $TP/unlab "${DD}"/local.m4b > /dev/null
 cd $p
-$TP/luac -o $1.tmp $1
+if [ -e /tmp/dumpdir/$1 ]; then
+	$TP/luac -b /tmp/dumpdir/$1 -o $1.tmp $1
+else
+	$TP/luac -o $1.tmp $1
+fi
+	
 mv $1.tmp /tmp/dumpdir/$1
 
 ### Check if there's a backup of the library already
