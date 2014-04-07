@@ -1,26 +1,81 @@
 #!/bin/bash
 ### Where are the ResidualVM tools found?
 TP=/home/jjezak/Projects/SummerOfCode2014/residualvm-tools/build
+### Where is the data found?
+D_DEMO=/mnt/data/scummvm/Monkey\ Island\ 4\ -\ Demo
+D_FULL=/mnt/data/scummvm/Monkey\ Island\ 4
+
+###############################################################################
+### Code
+
+if [[ $# -eq 0 ]]; then
+	echo "No script!"
+	exit 0
+fi
+
+FP=( _actors.lua _inventory.lua _menu.lua _options.lua _props1.lua _props3.lua _system.lua gme.lua lua.lua pac.lua patchme.lua pph.lua scu.lua vau.lua )
+FPCT=14
+
+function find_in() {
+	to_find=$1;
+	for i in {0..13}; do
+		to_check=${FP[$i]}
+		if [[ $to_check == $to_find ]]; then
+			return 0;
+		fi
+	done
+	return 1;
+}
+
+### Figure out if we're being called with just the short name
+SCRIPT=$1
+if [[ -e "${SCRIPT}.lua" ]]; then
+	SCRIPT=${SCRIPT}.lua
+fi
+
 ### Where is the EMI data?
-DD=/mnt/data/scummvm/Monkey\ Island\ 4
+if [ -z ${DEMO} ]; then
+	echo "Full Version"
+	DD=${D_FULL}
+	find_in $FILE
+	if [[ $? -eq 1 ]]; then
+		FILE=local.m4b
+	else
+		FILE=patch.m4b
+	fi
+else
+	echo "Demo Version"
+	DD=${D_DEMO}
+	if [ $1 == "_system.lua" ]; then
+		FILE=i9n.lab
+	else
+		FILE=MagDemo.lab
+	fi
+fi
 
 ### Code
 p=$(pwd)
 mkdir /tmp/dumpdir
-cd /tmp/dumpdir && $TP/unlab "${DD}"/local.m4b > /dev/null
+cd /tmp/dumpdir && $TP/unlab "${DD}"/${FILE} > /dev/null
 cd $p
-if [ -e /tmp/dumpdir/$1 ]; then
-	$TP/luac -b /tmp/dumpdir/$1 -o $1.tmp $1
+if [ -e /tmp/dumpdir/$SCRIPT ]; then
+	echo "Updating $SCRIPT in ${FILE}"
+	$TP/luac -b /tmp/dumpdir/$SCRIPT -o $SCRIPT.tmp $SCRIPT
+	### Compile failed...
+	if [[ $? -ne 0 ]]; then
+		echo "Compile failed, replacing $SCRIPT in ${FILE}"
+		$TP/luac -o $SCRIPT.tmp $SCRIPT
+	fi
 else
-	$TP/luac -o $1.tmp $1
+	echo "Inserting $SCRIPT into ${FILE}"
+	$TP/luac -o $SCRIPT.tmp $SCRIPT
 fi
-	
-mv $1.tmp /tmp/dumpdir/$1
+mv $SCRIPT.tmp /tmp/dumpdir/$SCRIPT
 
 ### Check if there's a backup of the library already
-if [ ! -e "${DD}"/local.m4b.bak ]; then
-	cp "${DD}"/local.m4b "${DD}"/local.m4b.bak
+if [ ! -e "${DD}"/${FILE}.bak ]; then
+	cp "${DD}"/${FILE} "${DD}"/${FILE}.bak
 fi
 
-${TP}/mklab --emi /tmp/dumpdir "${DD}"/local.m4b
+${TP}/mklab --emi /tmp/dumpdir "${DD}"/${FILE}
 rm -rf /tmp/dumpdir

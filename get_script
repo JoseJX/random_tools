@@ -1,15 +1,67 @@
 #!/bin/bash
 ### Where are the ResidualVM tools found?
 TP=/home/jjezak/Projects/SummerOfCode2014/residualvm-tools/build
-### Where is the EMI data?
-DD=/mnt/data/scummvm/Monkey\ Island\ 4
+### Where is the data found?
+D_DEMO=/mnt/data/scummvm/Monkey\ Island\ 4\ -\ Demo
+D_FULL=/mnt/data/scummvm/Monkey\ Island\ 4
 
+###############################################################################
 ### Code
+
+if [[ $# -eq 0 ]]; then
+	echo "No script!"
+	exit 0
+fi
+
+FP=( _actors.lua _inventory.lua _menu.lua _options.lua _props1.lua _props3.lua _system.lua gme.lua lua.lua pac.lua patchme.lua pph.lua scu.lua vau.lua )
+FPCT=14
+
+function find_in() {
+	to_find=$1;
+	for i in {0..13}; do
+		to_check=${FP[$i]}
+		if [[ $to_check == $to_find ]]; then
+			return 0;
+		fi
+	done
+	return 1;
+}
+
+### Where is the EMI data?
+SCRIPT=$1;
+SCR_EX="${SCRIPT##*.}"
+if [[ ! $SCR_EX == "lua" ]]; then
+	SCRIPT="${SCRIPT}.lua"	
+fi
+if [ -z ${DEMO} ]; then
+	echo "Full Version"
+	DD=${D_FULL}
+	find_in $SCRIPT
+	if [[ $? -eq 1 ]]; then
+		FILE=local.m4b
+	else
+		FILE=patch.m4b
+	fi
+else
+	echo "Demo Version"
+	DD=${D_DEMO}
+	if [ $FILE == "_system.lua" ]; then
+		FILE=i9n.lab
+	else
+		FILE=MagDemo.lab
+	fi
+fi
+
 p=$(pwd)
 mkdir /tmp/dumpdir
-cd /tmp/dumpdir && $TP/unlab "${DD}"/local.m4b > /dev/null
-cp /tmp/dumpdir/$1 $p
+cd /tmp/dumpdir && $TP/unlab "${DD}"/"${FILE}" > /dev/null
+echo "Dumping ${FILE} for script $SCRIPT"
+if [ -e /tmp/dumpdir/$SCRIPT ]; then
+	cp /tmp/dumpdir/$SCRIPT $p
+	cd $p
+	$TP/delua $SCRIPT > $SCRIPT.tmp
+	mv $SCRIPT.tmp $SCRIPT
+else
+	echo "Can't find $SCRIPT!"
+fi
 rm -rf /tmp/dumpdir
-cd $p
-$TP/delua $1 > $1.tmp
-mv $1.tmp $1
