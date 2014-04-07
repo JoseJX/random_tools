@@ -1,0 +1,31 @@
+#!/bin/bash
+### Tools directory
+TD=/home/jjezak/Projects/SummerOfCode2014/residualvm-tools/build
+
+###############################################################################
+# Code Below
+
+OLDFILE=$1
+PATCHR=$2
+
+SCRIPT=$(basename $OLDFILE)
+
+NEWFILE=$SCRIPT.newb
+
+echo "Generating patch applied to $SCRIPT"
+
+### Apply the patchr patch
+${TD}/patchr $OLDFILE /tmp/$NEWFILE $PATCHR
+if [[ ! $? -eq 0 ]]; then
+	echo "Unable to patch the binary!"
+fi
+
+### Delua the new and old
+${TD}/delua $OLDFILE > /tmp/$SCRIPT.old
+${TD}/delua /tmp/$NEWFILE > /tmp/$SCRIPT.new
+
+### Diff them
+diff -Naur /tmp/$SCRIPT.old /tmp/$SCRIPT.new
+
+### Clean up
+rm -f /tmp/$NEWFILE /tmp/$SCRIPT.old /tmp/$SCRIPT.new
