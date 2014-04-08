@@ -1,0 +1,23 @@
+677a678,699
+>     if arg1 == ZKEY then
+>     	local dbg_input = nil
+>     	local msg = "\n"
+>     	if (dd == nil) then
+>  		msg = "Put a result in dd to see it here."
+>  	elseif type(dd) == "table" then
+> 		msg = "\n"
+> 		local l1, l2 = next(dd, nil)
+> 		while l1 do
+> 			msg = msg .. "[" .. tostring(l1) .. "] = " .. tostring(l2) .. " \n"	
+> 			l1, l2 = next(dd, l1)
+> 		end
+> 	else
+> 		msg = msg .. tostring(dd)
+> 	end
+> 	dbg_input = InputDialog("Debug", msg)
+> 	if dbg_input then
+> 		dostring(dbg_input)
+> 	end
+> 	return TRUE 	
+>     end
+> 
