@@ -4,7 +4,7 @@ use Data::Dumper;
 
 my $golden_vector_list = "retailoutput.txt";
 my $test_vector_list = "testoutput.txt";
-my $tolerance = 0.0001;
+my $tolerance = 0.005;
 
 ### Open the golden vector list and read it in
 open (GF, $golden_vector_list);
@@ -54,7 +54,7 @@ foreach my $line (@tf) {
 		}
 		if($print_line) {
 			$errors++;
-			print $gv_line, " != ", $line, "\n";
+			print "Test ", $count, ": ", $gv_line, " != ", $line, "\n";
 			$print_line = 0;
 		}
 		$count++;
