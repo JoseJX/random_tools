@@ -295,10 +295,10 @@ inline quaternion quaternion::operator*(const quaternion& other) const
 {
 	quaternion tmp;
 
-	tmp.W = (other.W * W) - (other.X * X) - (other.Y * Y) - (other.Z * Z);
 	tmp.X = (other.W * X) + (other.X * W) + (other.Y * Z) - (other.Z * Y);
 	tmp.Y = (other.W * Y) + (other.Y * W) + (other.Z * X) - (other.X * Z);
 	tmp.Z = (other.W * Z) + (other.Z * W) + (other.X * Y) - (other.Y * X);
+	tmp.W = (other.W * W) - (other.X * X) - (other.Y * Y) - (other.Z * Z);
 
 	return tmp;
 }
@@ -601,8 +601,11 @@ inline void quaternion::toEuler(vector3df& euler) const
 	const f64 sqz = Z*Z;
 	const f64 test = 2.0 * (Y*W - X*Z);
 
+//	std::cout << "Test: " << test; 
+
 	if (core::equals(test, 1.0, 0.000001))
 	{
+//		std::cout << " Equals 1.0" << std::endl;
 		// heading = rotation about z-axis
 		euler.Z = (f32) (-2.0*atan2(X, W));
 		// bank = rotation about x-axis
@@ -612,6 +615,7 @@ inline void quaternion::toEuler(vector3df& euler) const
 	}
 	else if (core::equals(test, -1.0, 0.000001))
 	{
+//		std::cout << " Equals -1.0" << std::endl;
 		// heading = rotation about z-axis
 		euler.Z = (f32) (2.0*atan2(X, W));
 		// bank = rotation about x-axis
@@ -621,6 +625,11 @@ inline void quaternion::toEuler(vector3df& euler) const
 	}
 	else
 	{
+//		std::cout << " Neither" << std::endl;
+//		std::cout << "NE - X: " << X << " Y: " << Y << " Z: " << Z << " W: " << W << std::endl;
+		float a1 = (f32) (2.0 * (Y*Z +X*W));
+		float a2 = (f32) (-sqx - sqy + sqz + sqw);
+//		std::cout << a1 << " " << a2 << std::endl;
 		// heading = rotation about z-axis
 		euler.Z = (f32) atan2(2.0 * (X*Y +Z*W),(sqx - sqy - sqz + sqw));
 		// bank = rotation about x-axis
@@ -628,6 +637,7 @@ inline void quaternion::toEuler(vector3df& euler) const
 		// attitude = rotation about y-axis
 		euler.Y = (f32) asin( clamp(test, -1.0, 1.0) );
 	}
+//	std::cout << "X: " << euler.X << " Y: " << euler.Y << " Z: " << euler.Z << std::endl;
 }
 
 
