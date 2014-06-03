@@ -196,16 +196,16 @@ my $ydim = 8.5 * 1200;
 
 ### Scaling
 my $xs = 1.0;
-if ($highest[0] > $xdim)  {
+if ($highest[0] > $xdim and $highest[0] > 0)  {
 	$xs = $xdim / $highest[0];
 }
-my $ys;
+my $ys = 1.0;
 if ($game eq "EMI") {
-	if ($highest[2] > $ydim) {
+	if ($highest[2] > $ydim and $highest[2] > 0) {
 		$ys = $ydim / $highest[2];
 	}
 } else {
-	if ($highest[1] > $ydim) {
+	if ($highest[1] > $ydim and $highest[1] > 0) {
 		$ys = $ydim / $highest[1];
 	}
 }
